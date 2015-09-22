@@ -8,28 +8,25 @@ import functools
 
 class graphHelper:
     def __init__(self):
-        graph = functools.partial(gv.Graph, format='svg')
-        digraph = functools.partial(gv.Digraph, format='svg')
-        nodes = ['A', 'B', ('C', {})]
-        edges = [('A', 'B'), ('B', 'C'), (('A', 'C'), {}),]
-
-    def AddEdges(self, graph, edges):
-        for e in edges:
-            if isinstance(e[0], tuple):
-                graph.edge(*e[0], **e[1])
-            else:
-                graph.edge(*e)
-        return graph
-
-    def AddNodes(self, graph, nodes):
+	self.nodeCount = 0
+        self.graph = gv.Digraph(format='svg')
+   
+    def addNodes(self, nodes):
         for n in nodes:
-            if isinstance(n, tuple):
-                graph.node(n[0], **n[1])
-            else:
-                graph.node(n)
-        return graph
+	    l = ','.join(map(str, n.getVals()))+'\nDisciriminator: ' + str(n.disc) + '\nDiscriminator Value: ' +  str(n.getDiscValue())
+            self.graph.node(str(self.nodeCount), label = l)
+            self.nodeCount += 1
 
+    def addEdges(self, edges):
+        for e in edges:
+            self.graph.edge(e[0], e[1])
+            
 
+    def printGraph(self, filename='img/kdtree-out'):
+	self.graph.render(filename='img/kdtree-out')
+
+    
+		
 """
 @class node - simple kdtree node
 @method - __init__: Sets value,children,discriminator
@@ -49,6 +46,7 @@ class node:
         self.leftChild = None
         self.rightChild = None
         self.disc = disc
+	self.nodeCount = -1
 
     """
     @public
@@ -112,6 +110,9 @@ class kdtree:
 
         self.root = None
         self.dim = dim
+	self.vals = []
+	self.edges = []
+	self.numNodes = -1
 
     """
     @public
@@ -121,8 +122,11 @@ class kdtree:
     """
     def insert(self,val):
         if self._is_iterable(val):
+	    self.numNodes += 1
             if self.root == None:
                 self.root = node(val,0)
+		self.vals.append(self.root)
+		self.root.nodeCount = self.numNodes
             else:
                 newNode = node(val,0)
                 currRoot = self.root
@@ -141,14 +145,17 @@ class kdtree:
     @returns bool: true if successful
     """
     def _recInsert(self,root,newNode):
-        print(','.join(map(str, newNode.dimList)),' : ',','.join(map(str, root.dimList)))
-        print(newNode.getDiscValue(),' > ',root.getDiscValue(),'?')
+        #print(','.join(map(str, newNode.dimList)),' : ',','.join(map(str, root.dimList)))
+        #print(newNode.getDiscValue(),' > ',root.getDiscValue(),'?')
         if newNode.getDiscValue() > root.getDiscValue():
             #print("going right")
             if root.rightChild == None:
-                print("inserting right")
+                #print("inserting right")
                 root.rightChild = newNode
                 newNode.disc = (root.disc + 1) % self.dim
+		newNode.nodeCount = self.numNodes
+		self.vals.append(newNode)
+		self.edges.append((str(root.nodeCount), str(newNode.nodeCount)))
             else:
                 #print("rec call right")
                 self._recInsert(root.rightChild,newNode)
@@ -158,6 +165,9 @@ class kdtree:
                 #print("inserting left")
                 root.leftChild = newNode
                 newNode.disc = (root.disc + 1) % self.dim
+		newNode.nodeCount = self.numNodes
+		self.vals.append(newNode)
+		self.edges.append((str(root.nodeCount), str(newNode.nodeCount)))
             else:
                 #print("rec call left")
                 self._recInsert(root.leftChild,newNode)
@@ -171,14 +181,21 @@ class kdtree:
             return
         else:
             if traversal_type == "pre":
+		#l = ','.join(map(str, root.getVals()))+',Disc:'+root.getDiscValue()
+                #self.vals.append(l)
                 root.printNode()
+
                 print("=========")
             self._Traversal(root.leftChild,traversal_type)
             if traversal_type == "in":
-                root.printNode()
-                print("=========")
-            self._Traversal(root.rightChild,traversal_type)
-            if traversal_type == "post":
+		#l = ','.join(map(str, root.getVals()))+',Disc:' + root.getDiscValue()
+                #self.vals.append(l)
+	        root.printNode()
+	        print("========")
+	    self._Traversal(root.rightChild, traversal_type)
+	    if traversal_type == "post":
+		#l = ','.join(map(str, root.getVals()))+',Disc:'+root.getDiscValue()
+		#self.vals.append(l)		
                 root.printNode()
                 print("=========")
 
@@ -198,9 +215,12 @@ class kdtree:
             if len(queue) > 0:
                 root = queue.pop(0)
                 self._breadthFirst(root,queue)
+    
+    def getList(self):
+	return self.vals
 
-
-
+    def getEdges(self):
+	return self.edges
 
     """
     @private
@@ -229,16 +249,7 @@ if __name__ == '__main__':
     tree.insert([7,1,6])
     tree.Traversal("pre")
     tree.breadthFirst()
-    g1 = digraph()
-    Nodes = [[1, 2, 3], [3, 4, 5], [4, 5, 6], [2,4,3], [1,5,3]]
-    Temp = []
-    for n in Nodes:
-        print n
-        n = ', '.join(map(str, n))
-        print n
-        Temp.append(n)
-        g1.node(n)
-    for n in range(len(Temp)-1):
-        g1.edge(Temp[n], Temp[n+1])
-    filename = g1.render(filename = 'img/g1')
-    print filename
+    helper = graphHelper()
+    helper.addNodes(tree.getList())
+    helper.addEdges(tree.getEdges())
+    helper.printGraph() 
