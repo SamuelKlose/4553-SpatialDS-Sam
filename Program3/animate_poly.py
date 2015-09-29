@@ -32,6 +32,7 @@ class Point:
     def __init__(self, x=0.0, y=0.0):
         self.x = x
         self.y = y
+        self.direction = "S"
 
     def __add__(self, p):
         """Point(x1+x2, y1+y2)"""
@@ -135,6 +136,9 @@ class Point:
         assert direction in ['N','NE','E','SE','S','SW','W','NW']
 
         self.direction = direction
+        
+    def get_direction(self):
+        return self.direction
 
     def update_position(self):
         if self.direction == "N":
@@ -235,7 +239,7 @@ class Polygon:
     def __init__(self, pts=[]):
         """Initialize a polygon from list of points."""
         self.set_points(pts)
-        
+        self.set_direction("N")
 
     def set_points(self, pts):
         """Reset the poly coordinates."""
@@ -292,29 +296,20 @@ class Polygon:
         
     def set_direction(self,direction):
          assert direction in ['N','NE','E','SE','S','SW','W','NW']
+         for p in self.points:
+             p.set_direction(direction)
          self.direction = direction
+    
+    def get_direction(self):
+        return self.direction
 
-    def update_position(self, p):
-        if self.direction == "N":
-            self.y -= 1
-        if self.direction == "NE":
-            self.y -= 1
-            self.x += 1
-        if self.direction == "E":
-            self.x += 1
-        if self.direction == "SE":
-            self.x += 1
-            self.y += 1
-        if self.direction == "S":
-            self.y += 1
-        if self.direction == "SW":
-            self.x -= 1
-            self.y += 1
-        if self.direction == "W":
-            self.x -= 1
-        if self.direction == "NW":
-            self.y -= 1
-            self.x -= 1
+    def update_position(self):
+        generic = []
+        for p in self.points:   
+            p.update_position() 
+            generic.append(p.as_tuple())
+        
+        self.set_points(generic)
 
     def __str__( self ):
         return "<Polygon \n Points: %s \n Mbr: %s>" % ("".join(str(self.points)),str(self.mbr))
@@ -327,9 +322,9 @@ class Driver(pantograph.PantographHandler):
 
     def setup(self):
         
-        self.poly1 = Polygon([(405, 328),(377, 367),(444, 413),(504, 384),(519, 307),(453, 248),(380, 250),(365, 278),(374, 325)])
-        self.poly2 = Polygon([(83, 163),  (90, 74),  (145, 60),  (201, 69),  (265, 46),  (333, 61),  (352, 99),  (370, 129),  (474, 138),  (474, 178),  (396, 225),  (351, 275),  (376, 312),  (382, 356),  (338, 368),  (287, 302),  (224, 304),  (128, 338),  (110, 316),  (129, 270),  (83, 231),  (103, 201),  (126, 162),  (65, 51)])
-        self.poly3 = Polygon([(100, 100), (125, 125), (150, 150), (175, 175)])
+        self.poly1 = Polygon([(405, 528),(377, 567),(444, 613),(504, 584),(519, 507),(453, 448),(380, 450),(365, 478),(374, 525)])
+        self.poly2 = Polygon([(83, 163),  (90, 74),  (145, 60),  (201, 69),  (265, 46),  (333, 61),  (352, 99),  (370, 129),  (474, 138),  (474, 178),  (396, 225),  (351, 275),  (376, 312),  (382, 356),  (338, 368),  (287, 302),  (224, 304),  (128, 338),  (129, 270), (110, 316),  (83, 231),  (103, 201),  (126, 162),  (165, 151)])
+        self.poly3 = Polygon([(723, 412), (842, 367), (1001, 350), (1155, 275), (775, 50), (912, 333)])
         self.p1 = Point(self.width/2, self.height/2)
         self.p2 = Point(self.width/4, self.height/4)
         self.p3 = Point(self.width/8, self.height/8)
@@ -344,61 +339,76 @@ class Driver(pantograph.PantographHandler):
         self.draw_rect(0, 0, self.width, self.height, color= "#000")
 
         if  self.poly1.point_inside_polygon(self.p1):
-            color = "#0F0"
+            color1 = "#0F0"
+        elif self.poly2.point_inside_polygon(self.p1):
+            color1 = "#0F0"
+        elif self.poly3.point_inside_polygon(self.p1):
+            color1 = "#0F0"
         else:
-            color = "#F00"
-        self.fill_oval(self.p1.x, self.p1.y, 7, 7, color)
+            color1 = "#F00"
+        self.fill_oval(self.p1.x, self.p1.y, 7, 7, color1)
 
         if  self.poly1.point_inside_polygon(self.p2):
-            color = "#0F0"
+            color2 = "#0F0"
+        elif self.poly2.point_inside_polygon(self.p2):
+            color2 = "#0F0"
+        elif self.poly3.point_inside_polygon(self.p2):
+            color2 = "#0F0"
         else:
-            color = "#F00"
-        self.fill_oval(self.p2.x, self.p2.y, 7, 7, color)
-            
+            color2 = "#F00"
+        self.fill_oval(self.p2.x, self.p2.y, 7, 7, color2)
+        
         if  self.poly1.point_inside_polygon(self.p3):
-            color = "#0F0"
+            color3 = "#0F0"
+        elif self.poly2.point_inside_polygon(self.p3):
+            color3 = "#0F0"
+        elif self.poly3.point_inside_polygon(self.p3):
+            color3 = "#0F0"
         else:
-            color = "#F00"
-        self.fill_oval(self.p3.x, self.p3.y, 7, 7, color)
-        
-        if  self.poly2.point_inside_polygon(self.p1):
-            color = "#0F0"
-        else:
-            color = "#F00"
-        self.fill_oval(self.p1.x, self.p1.y, 7, 7, color)
-
-        if  self.poly2.point_inside_polygon(self.p2):
-            color = "#0F0"
-        else:
-            color = "#F00"
-        self.fill_oval(self.p2.x, self.p2.y, 7, 7, color)
-            
-        if  self.poly2.point_inside_polygon(self.p3):
-            color = "#0F0"
-        else:
-            color = "#F00"
-        self.fill_oval(self.p3.x, self.p3.y, 7, 7, color)
-        
-        if  self.poly3.point_inside_polygon(self.p1):
-            color = "#0F0"
-        else:
-            color = "#F00"
-        self.fill_oval(self.p1.x, self.p1.y, 7, 7, color)
-
-        if  self.poly3.point_inside_polygon(self.p2):
-            color = "#0F0"
-        else:
-            color = "#F00"
-        self.fill_oval(self.p2.x, self.p2.y, 7, 7, color)
-            
-        if  self.poly3.point_inside_polygon(self.p3):
-            color = "#0F0"
-        else:
-            color = "#F00"
-        self.fill_oval(self.p3.x, self.p3.y, 7, 7, color)
+            color3 = "#F00"
+        self.fill_oval(self.p3.x, self.p3.y, 7, 7, color3)
 
     def changeDirection(self, p1, p2):
-        pass
+        poly1points = p1.get_points()
+        poly2points = p2.get_points()
+        for point in poly1points:
+            if p1.get_direction() == "N" and point[1] < self.height:
+                p1.set_direction("S")
+                return p1.get_direction()
+            if p1.get_direction() == "NE" and point[1] < self.height:
+                p1.set_direction("SE")
+                return p1.get_direction()
+            if p1.get_direction() == "NE" and point[0] > self.width:
+                p1.set_direction("NW")
+                return p1.get_direction()
+            if p1.get_direction() == "E" and point[0] > self.width:
+                p1.set_direction("W")
+                return p1.get_direction()
+            if p1.get_direction() == "SE" and point[1] > self.height:
+                p1.set_direction("NE")
+                return p1.get_direction()
+            if p1.get_direction() == "SE" and point[0] > self.width:
+                p1.set_direction("SW")
+                return p1.get_direction()
+            if p1.get_direction() == "S" and point[1] > self.height:
+                p1.set_direction("N")
+                return p1.get_direction()
+            if p1.get_direction() == "SW" and point[1] > self.height:
+                p1.set_direction("NW")
+                return p1.get_direction()
+            if p1.get_direction() == "SW" and point[0] < self.width:
+                p1.set_direction("SE")
+                return p1.get_direction()
+            if p1.get_direction() == "W" and point[0] < self.width:
+                p1.set_direction("E")
+                return p1.get_direction()
+            if p1.get_direction() == "NW" and point[1] < self.height:
+                p1.set_direction("SW")
+                return p1.get_direction()
+            if p1.get_direction() == "NW" and point[0] < self.width:
+                p1.set_direction("NE")
+                return p1.get_direction()
+        
 
     def hitWall(self, p):
         pass
@@ -408,10 +418,17 @@ class Driver(pantograph.PantographHandler):
         self.p1.update_position()
         self.p2.update_position()
         self.p3.update_position()
-        if self.poly1.intersects(self.poly2):
-            self.changeDirection(self.poly1, self.poly2)
-        elif self.poly1.intersects(self.poly3):
-            self.changeDirection(self.poly1, self.poly3)
+        #if self.poly1.intersects(self.poly2):
+            #self.changeDirection(self.poly1, self.poly2)
+        #elif self.poly1.intersects(self.poly3):
+            #self.changeDirection(self.poly1, self.poly3)
+        
+        #self.poly1.set_direction(self.changeDirection(self.poly1, self.poly2))
+        #self.poly2.set_direction(self.changeDirection(self.poly2, self.poly1))
+        #self.poly3.set_direction(self.changeDirection(self.poly3, self.poly1))
+        self.poly1.update_position()
+        self.poly2.update_position()
+        self.poly3.update_position()
         
         self.drawShapes()
 
