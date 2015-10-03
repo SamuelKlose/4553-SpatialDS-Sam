@@ -4,7 +4,8 @@
 @description - This program does creates 3 polygons and three points and moves them around
 the screen. They bounce off the edges
 
-@resources - I found code and methods at http://pythonhelper.com and used some polygon code.
+@resources - I found code and methods at http://pythonhelper.com,
+http://gamedev.stackexchange.com/, http://stackoverflow.com/ and used code from assignment and github.
 """
 """Point and Rectangle classes.
 
