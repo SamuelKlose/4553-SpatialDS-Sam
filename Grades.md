@@ -6,7 +6,7 @@
 | -       | Folder and files named correctly                 |         |   05     | ![Alt text][3] |
 | ***2*** | ***Output***                                     | 30      |          | ![Alt text][1] |
 | -       | Program creates output.dat                       |         |    10    | ![Alt text][1] |
-| -       | Output formatted correctly (or at least close)   |         |    0     | ![Alt text][1] |
+| -       | Output formatted correctly (or at least close)   |         |    0     | ![Alt text][3] |
 | -       | Ran for both bounding box and 500 mile radius    |         |   10     | ![Alt text][1] |
 | ***3*** | ***Correctness***                                | 50      |          | ![Alt text][1] |
 | -       | Program was timed.                               |         |   10     | ![Alt text][1] |
