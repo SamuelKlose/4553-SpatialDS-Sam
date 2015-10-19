@@ -6,6 +6,7 @@ When the balls collide they change color, grow in size, and change direction. No
 of the screen. Uses python 2.7. Requires pantograph and numpy installed. After running copy go to the localhost by placing
 http://127.0.0.1:8080/ in the browser in order to view the animation. The quadtree bounding boxes are shown behind the balls
 as well to see it splitting in real time. Currently set to split when there are 2 balls in a node with a maximum level of division of 4.
+Click on the screen to stop movement. Press the up arrow to increase ball speed, down to lower it.
 @resources - I found code and methods at http://www.learnpygame.com, http://stackoverflow.com, http://gamedev.stackexchange.com/
 http://gamedevelopment.tutsplus.com/tutorials/quick-tip-use-quadtrees-to-detect-likely-collisions-in-2d-space--gamedev-374, and
 the quadtree code Dr. Griffin pushed onto his github
